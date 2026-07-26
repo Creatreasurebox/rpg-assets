@@ -1,11 +1,11 @@
-const USER="Creatreasurebox";
-const REPO="rpg-assets";
-const ROOT="assets";
- 
-const gallery=document.getElementById("gallery");
-const back=document.getElementById("back");
+const USER = "Creatreasurebox";
+const REPO = "rpg-assets";
+const ROOT = "assets";
 
-let currentPath=ROOT;
+const gallery = document.getElementById("gallery");
+const back = document.getElementById("back");
+
+let currentPath = ROOT;
 let history = [];
 
 let currentImages = [];
@@ -14,40 +14,36 @@ const prevImage = document.getElementById("prevImage");
 const nextImage = document.getElementById("nextImage");
 const breadcrumb = document.getElementById("breadcrumb");
 
-// récupérer le contenu d'un dossier github
 async function getFolder(path){
-    const url=`https://api.github.com/repos/${USER}/${REPO}/contents/${path}`;
-    const res=await fetch(url);
+    const url = `https://api.github.com/repos/${USER}/${REPO}/contents/${path}`;
+    const res = await fetch(url);
     return await res.json();
 } 
 
 function showFolders(folders){
-    folders.forEach(folder=>{
-        const card=document.createElement("div");
-        card.className="folder";
-        // Ajout du bouton copy-folder dans l'interface
-        card.innerHTML=`
+    folders.forEach(folder => {
+        const card = document.createElement("div");
+        card.className = "folder";
+        card.innerHTML = `
 		<img class="folder-icon" src="./png/folder.png" alt="folder">
 		<div class="name">${folder.name}</div>
         <button class="copy-folder" title="Copier l'URL du dossier">⧉</button>
 	`;
 
-        // Gestion du clic sur le bouton de copie
         const button = card.querySelector(".copy-folder");
         button.onclick = (e) => {
-            e.stopPropagation(); // Empêche d'ouvrir le dossier quand on clique sur copier
+            e.stopPropagation();
             const customUrl = `https://creatreasurebox.github.io/rpg-assets/gallery/#${encodeURI(folder.path)}`;
             navigator.clipboard.writeText(customUrl);
             button.textContent = "✓";
-            setTimeout(()=>{
+            setTimeout(() => {
                 button.textContent = "⧉";
             }, 1000);
         };
 
-        // Comportement normal au clic sur le reste de la carte
-        card.onclick=()=>{
+        card.onclick = () => {
             history.push(currentPath);
-            currentPath=folder.path;
+            currentPath = folder.path;
             loadFolder(currentPath);
         };
 
@@ -56,30 +52,26 @@ function showFolders(folders){
 }
 
 function showImages(images){
-    images.forEach(image=>{
-        const card=document.createElement("div");
-        card.className="icon";
-        card.innerHTML=`
+    images.forEach(image => {
+        const card = document.createElement("div");
+        card.className = "icon";
+        card.innerHTML = `
             <img src="${image.download_url}" alt="">
             <button class="download-btn" title="Télécharger l'image">⬇</button>
         `;
         const button = card.querySelector(".download-btn");
-
         const img = card.querySelector("img");
 
-        img.onclick = ()=>{
+        img.onclick = () => {
             currentImageIndex = images.indexOf(image);
             openPreview();
         };
 
         button.onclick = async (e) => {
             e.stopPropagation();
-            
-            // Effet visuel de chargement
             button.textContent = "⏳";
             
             try {
-                // Récupère l'image et force le téléchargement
                 const response = await fetch(image.download_url);
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
@@ -87,20 +79,18 @@ function showImages(images){
                 const a = document.createElement('a');
                 a.style.display = 'none';
                 a.href = url;
-                a.download = image.name; // Utilise le nom d'origine du fichier
+                a.download = image.name;
                 document.body.appendChild(a);
                 a.click();
                 
                 window.URL.revokeObjectURL(url);
-                
                 button.textContent = "✓";
             } catch (error) {
                 console.error("Erreur de téléchargement:", error);
                 button.textContent = "❌";
             }
             
-            // Remet l'icône après 2 secondes
-            setTimeout(()=>{
+            setTimeout(() => {
                 button.textContent = "⬇";
             }, 2000);
         };
@@ -108,15 +98,12 @@ function showImages(images){
     });
 }
 
-// charge un dossier
 async function loadFolder(path){
-    // Affiche un message de chargement
     gallery.innerHTML = "<div style='grid-column: 1 / -1; text-align: center; color: var(--tx1); padding: 40px;'>Chargement en cours...</div>";
 
     try {
         const files = await getFolder(path);
 
-        // VÉRIFICATION : Si GitHub renvoie une erreur (ex: API Rate Limit)
         if(files.message) {
             gallery.innerHTML = `
             <div style='grid-column: 1 / -1; background: var(--bg2); border: 1px solid red; padding: 20px; border-radius: 12px; text-align: center;'>
@@ -125,33 +112,31 @@ async function loadFolder(path){
                 <p><strong>Solution : Reviens d'ici 30 à 60 minutes, tout refonctionnera tout seul !</strong></p>
                 <p style='font-size: 11px; opacity: 0.5;'>Message système : ${files.message}</p>
             </div>`;
-            return; // Arrête la fonction ici pour ne pas faire planter le reste
+            return;
         }
 
-        gallery.innerHTML = ""; // Vide le message de chargement
+        gallery.innerHTML = "";
 
-        const folders = files.filter(
-            f => f.type === "dir"
-        );
+        files.sort((a, b) => {
+            if (a.type !== b.type) {
+                return a.type === 'dir' ? -1 : 1;
+            }
+            return a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' });
+        });
 
-        const images = files.filter(
-            f =>
-            f.type === "file" &&
-            /\.(png|jpg|jpeg|webp|gif|svg)$/i.test(f.name)
-        );
+        const folders = files.filter(f => f.type === "dir");
+        const images = files.filter(f => f.type === "file" && /\.(png|jpg|jpeg|webp|gif|svg)$/i.test(f.name));
         currentImages = images;
 
         showFolders(folders);
         showImages(images);
 
-        // affiche le bouton retour si pas à la racine
         if(path !== ROOT){
             back.classList.remove("hidden");
-        }else{
+        } else {
             back.classList.add("hidden");
         }
 
-        // fil d'ariane
         updateBreadcrumb(path);
 
     } catch (error) {
@@ -159,8 +144,7 @@ async function loadFolder(path){
     }
 }
 
-// back to homepage
-back.onclick = ()=>{
+back.onclick = () => {
     if (history.length > 0) {
         currentPath = history.pop();
         loadFolder(currentPath);
@@ -170,7 +154,6 @@ back.onclick = ()=>{
     }
 };
 
-// ajoute le preview
 const preview = document.getElementById("preview");
 const previewImage = document.getElementById("previewImage");
 
@@ -179,17 +162,14 @@ function openPreview(){
 
     previewImage.src = currentImages[currentImageIndex].download_url;
 
-    // Supprime l'ancien bouton s'il existe
     const oldBtn = preview.querySelector('.preview-download-btn');
     if (oldBtn) oldBtn.remove();
 
-    // Crée le nouveau bouton
     const downloadBtn = document.createElement('button');
     downloadBtn.className = 'preview-download-btn';
     downloadBtn.title = 'Télécharger cette image en grand';
     downloadBtn.textContent = '⬇';
 
-    // Comportement du clic
     downloadBtn.onclick = async (e) => {
         e.stopPropagation();
         downloadBtn.textContent = "⏳";
@@ -233,7 +213,6 @@ function hidePreview(){
     preview.classList.remove("show");
     preview.classList.add("hide");
 
-    // pour l'animation
     setTimeout(() => {
         preview.classList.add("hidden");
         preview.classList.remove("hide");
@@ -241,7 +220,6 @@ function hidePreview(){
     }, 250);
 }
 
-// ferme quand je clique en-dehors de l'image
 if(preview){
     preview.onclick = (e) => {
         if(e.target === preview){
@@ -250,7 +228,6 @@ if(preview){
     };
 }
 
-// comportement du clic sur les flèches de preview
 prevImage.onclick = (e) => {
     e.stopPropagation();
     showImage(currentImageIndex - 1);
@@ -264,7 +241,7 @@ nextImage.onclick = (e) => {
 function showImage(index){
     if(index < 0){
         index = currentImages.length - 1;
-    }else if(index >= currentImages.length){
+    } else if(index >= currentImages.length){
         index = 0;
     }
 
@@ -272,7 +249,6 @@ function showImage(index){
     previewImage.src = currentImages[currentImageIndex].download_url;
 }
 
-// ajout fil d'ariane
 function updateBreadcrumb(path){
     if(!breadcrumb) return;
 
@@ -285,7 +261,6 @@ function updateBreadcrumb(path){
     breadcrumb.textContent = parts.length ? parts.join(" / ") : "accueil";
 }
 
-// lance la galerie en vérifiant l'URL
 const hashPath = decodeURI(window.location.hash.substring(1));
 
 if (hashPath) {
@@ -295,29 +270,6 @@ if (hashPath) {
     loadFolder(ROOT);
 }
 
-// Désactiver le clic droit sur toute la page
 document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
 });
-
-
-// Exemple après le fetch de l'API GitHub :
-fetch(apiUrl)
-  .then(response => response.json())
-  .then(data => {
-      
-      // === AJOUTE CE TRI ICI ===
-      data.sort((a, b) => {
-          // Optionnel : si tu veux que les dossiers soient TOUJOURS en premier, 
-          // et les fichiers ensuite, tout en étant triés par ordre alphabétique :
-          if (a.type !== b.type) {
-              return a.type === 'dir' ? -1 : 1;
-          }
-          // Tri alphabétique du nom
-          return a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' });
-      });
-      // =========================
-
-      // Le reste de ton code qui affiche la galerie (boucle sur data, etc.)
-      displayGallery(data);
-  });
