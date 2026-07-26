@@ -104,17 +104,6 @@ async function loadFolder(path){
     try {
         const files = await getFolder(path);
 
-        if(files.message) {
-            gallery.innerHTML = `
-            <div style='grid-column: 1 / -1; background: var(--bg2); border: 1px solid red; padding: 20px; border-radius: 12px; text-align: center;'>
-                <h3 style='color: #ff6b6b; margin-top:0;'>⚠️ Galerie temporairement indisponible</h3>
-                <p>GitHub limite le nombre de rechargements de la page à 60 par heure. Tu as atteint cette limite pendant tes tests.</p>
-                <p><strong>Solution : Reviens d'ici 30 à 60 minutes, tout refonctionnera tout seul !</strong></p>
-                <p style='font-size: 11px; opacity: 0.5;'>Message système : ${files.message}</p>
-            </div>`;
-            return;
-        }
-
         gallery.innerHTML = "";
 
         files.sort((a, b) => {
