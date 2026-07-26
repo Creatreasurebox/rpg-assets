@@ -25,7 +25,7 @@ function showFolders(folders){
     folders.forEach(folder=>{
         const card=document.createElement("div");
         card.className="folder";
-        // Ajout du bouton copy-folder dans l'interface[cite: 1]
+        // Ajout du bouton copy-folder dans l'interface
         card.innerHTML=`
 		<img class="folder-icon" src="./png/folder.png" alt="folder">
 		<div class="name">${folder.name}</div>
@@ -35,7 +35,7 @@ function showFolders(folders){
         // Gestion du clic sur le bouton de copie
         const button = card.querySelector(".copy-folder");
         button.onclick = (e) => {
-            e.stopPropagation(); // Empêche d'ouvrir le dossier quand on clique sur copier[cite: 1]
+            e.stopPropagation(); // Empêche d'ouvrir le dossier quand on clique sur copier
             const customUrl = `https://creatreasurebox.github.io/rpg-assets/gallery/#${encodeURI(folder.path)}`;
             navigator.clipboard.writeText(customUrl);
             button.textContent = "✓";
@@ -44,19 +44,18 @@ function showFolders(folders){
             }, 1000);
         };
 
-        // Comportement normal au clic sur le reste de la carte[cite: 1]
+        // Comportement normal au clic sur le reste de la carte
         card.onclick=()=>{
             history.push(currentPath);
             currentPath=folder.path;
             loadFolder(currentPath);
         };
 
-        gallery.appendChild(card); //[cite: 1]
+        gallery.appendChild(card); 
     });
 }
 
 function showImages(images){
-
     images.forEach(image=>{
         const card=document.createElement("div");
         card.className="icon";
@@ -88,7 +87,7 @@ function showImages(images){
                 const a = document.createElement('a');
                 a.style.display = 'none';
                 a.href = url;
-                a.download = image.name; // Utilise le nom d'origine du fichier (ex: image.png)
+                a.download = image.name; // Utilise le nom d'origine du fichier
                 document.body.appendChild(a);
                 a.click();
                 
@@ -172,7 +171,6 @@ back.onclick = ()=>{
 };
 
 // ajoute le preview
-
 const preview = document.getElementById("preview");
 const previewImage = document.getElementById("previewImage");
 
@@ -226,57 +224,6 @@ function openPreview(){
 
     requestAnimationFrame(() => {
         preview.classList.add("show");
-    });
-}
-    images.forEach(image=>{
-        const card=document.createElement("div");
-        card.className="icon";
-        card.innerHTML=`
-            <img src="${image.download_url}" alt="">
-            <button class="download-btn" title="Télécharger l'image">⬇</button>
-        `;
-        const button = card.querySelector(".download-btn");
-
-        const img = card.querySelector("img");
-
-        img.onclick = ()=>{
-            currentImageIndex = images.indexOf(image);
-            openPreview();
-        };
-
-        button.onclick = async (e) => {
-            e.stopPropagation();
-            
-            // Effet visuel de chargement
-            button.textContent = "⏳";
-            
-            try {
-                // Récupère l'image et force le téléchargement
-                const response = await fetch(image.download_url);
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = image.name; // Utilise le nom d'origine du fichier (ex: image.png)
-                document.body.appendChild(a);
-                a.click();
-                
-                window.URL.revokeObjectURL(url);
-                
-                button.textContent = "✓";
-            } catch (error) {
-                console.error("Erreur de téléchargement:", error);
-                button.textContent = "❌";
-            }
-            
-            // Remet l'icône après 2 secondes
-            setTimeout(()=>{
-                button.textContent = "⬇";
-            }, 2000);
-        };
-        gallery.appendChild(card);
     });
 }
 
@@ -337,7 +284,6 @@ function updateBreadcrumb(path){
 
     breadcrumb.textContent = parts.length ? parts.join(" / ") : "accueil";
 }
-
 
 // lance la galerie en vérifiant l'URL
 const hashPath = decodeURI(window.location.hash.substring(1));
