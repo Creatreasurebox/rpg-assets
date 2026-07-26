@@ -111,33 +111,53 @@ function showImages(images){
 
 // charge un dossier
 async function loadFolder(path){
-    gallery.innerHTML = "";
+    // Affiche un message de chargement
+    gallery.innerHTML = "<div style='grid-column: 1 / -1; text-align: center; color: var(--tx1); padding: 40px;'>Chargement en cours...</div>";
 
-    const files = await getFolder(path);
+    try {
+        const files = await getFolder(path);
 
-    const folders = files.filter(
-        f => f.type === "dir"
-    );
+        // VÉRIFICATION : Si GitHub renvoie une erreur (ex: API Rate Limit)
+        if(files.message) {
+            gallery.innerHTML = `
+            <div style='grid-column: 1 / -1; background: var(--bg2); border: 1px solid red; padding: 20px; border-radius: 12px; text-align: center;'>
+                <h3 style='color: #ff6b6b; margin-top:0;'>⚠️ Galerie temporairement indisponible</h3>
+                <p>GitHub limite le nombre de rechargements de la page à 60 par heure. Tu as atteint cette limite pendant tes tests.</p>
+                <p><strong>Solution : Reviens d'ici 30 à 60 minutes, tout refonctionnera tout seul !</strong></p>
+                <p style='font-size: 11px; opacity: 0.5;'>Message système : ${files.message}</p>
+            </div>`;
+            return; // Arrête la fonction ici pour ne pas faire planter le reste
+        }
 
-    const images = files.filter(
-        f =>
-        f.type === "file" &&
-        /\.(png|jpg|jpeg|webp|gif|svg)$/i.test(f.name)
-    );
-    currentImages = images;
+        gallery.innerHTML = ""; // Vide le message de chargement
 
-    showFolders(folders);
-    showImages(images);
+        const folders = files.filter(
+            f => f.type === "dir"
+        );
 
-    // affiche le bouton retour si pas à la racine
-    if(path !== ROOT){
-        back.classList.remove("hidden");
-    }else{
-        back.classList.add("hidden");
+        const images = files.filter(
+            f =>
+            f.type === "file" &&
+            /\.(png|jpg|jpeg|webp|gif|svg)$/i.test(f.name)
+        );
+        currentImages = images;
+
+        showFolders(folders);
+        showImages(images);
+
+        // affiche le bouton retour si pas à la racine
+        if(path !== ROOT){
+            back.classList.remove("hidden");
+        }else{
+            back.classList.add("hidden");
+        }
+
+        // fil d'ariane
+        updateBreadcrumb(path);
+
+    } catch (error) {
+        gallery.innerHTML = `<div style='grid-column: 1 / -1; color: red; text-align: center;'>Erreur de connexion à GitHub.</div>`;
     }
-
-    // fil d'ariane
-    updateBreadcrumb(path);
 }
 
 // back to homepage
