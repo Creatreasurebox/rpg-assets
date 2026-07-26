@@ -275,7 +275,7 @@ text-transform: uppercase;
 }
 
 .disclaimer {
-    font-size: 14px;
+    font-size: 16px;
 font-family: 'VT323', monospace;
     color: var(--tx1);
     opacity: 0.8;
