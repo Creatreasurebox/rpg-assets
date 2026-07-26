@@ -2,6 +2,8 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400..700&display=swap');
 
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
 @font-face {
     font-family: "Astone Nouvea";
     src: url("./fonts/Astone-Nouvea.woff2") format("woff2");
@@ -274,7 +276,7 @@ text-transform: uppercase;
 
 .disclaimer {
     font-size: 14px;
-    font-style: italic;
+font-family: 'VT323', monospace;
     color: var(--tx1);
     opacity: 0.8;
     margin-top: px;
