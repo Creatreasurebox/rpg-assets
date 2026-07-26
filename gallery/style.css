@@ -316,8 +316,3 @@ opacity: 1;
     background: rgba(255, 255, 255, 0.1);
 }
 
-.gallery.icons-folder .icon img {
-    width: 100px !important;
-    height: 100px !important;
-    object-fit: contain !important;
-}
