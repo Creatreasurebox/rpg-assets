@@ -22,22 +22,35 @@ async function getFolder(path){
 } 
 
 function showFolders(folders){
-
     folders.forEach(folder=>{
         const card=document.createElement("div");
         card.className="folder";
+        // Ajout du bouton copy-folder dans l'interface[cite: 1]
         card.innerHTML=`
 		<img class="folder-icon" src="./png/folder.png" alt="folder">
 		<div class="name">${folder.name}</div>
+        <button class="copy-folder" title="Copier l'URL du dossier">⧉</button>
 	`;
 
+        // Gestion du clic sur le bouton de copie
+        const button = card.querySelector(".copy-folder");
+        button.onclick = (e) => {
+            e.stopPropagation(); // Empêche d'ouvrir le dossier quand on clique sur copier[cite: 1]
+            navigator.clipboard.writeText(folder.html_url); // Copie le lien GitHub du dossier
+            button.textContent = "✓";
+            setTimeout(()=>{
+                button.textContent = "⧉";
+            }, 1000);
+        };
+
+        // Comportement normal au clic sur le reste de la carte[cite: 1]
         card.onclick=()=>{
             history.push(currentPath);
             currentPath=folder.path;
             loadFolder(currentPath);
         };
 
-        gallery.appendChild(card);
+        gallery.appendChild(card); //[cite: 1]
     });
 }
 

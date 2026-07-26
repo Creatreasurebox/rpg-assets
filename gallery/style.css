@@ -85,11 +85,37 @@ h1 {
     width:160px;
     height:160px;
     padding:12px;
-    background:var(--bg2);
-    border:1px solid var(--bg3);
-    border-radius:12px;
+    background:var(--bg2); /*[cite: 2] */
+    border:1px solid var(--bg3); /*[cite: 2] */
+    border-radius:12px; /*[cite: 2] */
     cursor:pointer;
     transition:.2s;
+    position: relative; /* Ligne ajoutée pour permettre le positionnement absolu du bouton */
+}
+
+/* Styles inspirés de ta classe .copy existante[cite: 2] */
+.copy-folder {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0; /* Caché par défaut */
+    background: rgba(13,17,23,.85);
+    color: var(--tx1);
+    border: 1px solid var(--bg3);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+/* Fait apparaître le bouton au survol du dossier, comme pour les icônes[cite: 2] */
+.folder:hover .copy-folder {
+    opacity: 1;
 }
 
 .folder:hover {
