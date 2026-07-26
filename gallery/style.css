@@ -158,7 +158,7 @@ h1 {
     transition: .2s;
 }
 
-.tumblr:hover img {
+.tumblricon:hover img {
     opacity: .8;
 }
 
