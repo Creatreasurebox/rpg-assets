@@ -69,6 +69,11 @@ text-transform: uppercase;
     font-size: 12px;
 }
 
+a {
+    color: inherit;
+    text-decoration: underline;
+}
+
 #back:hover {
     background: var(--bg3);
     color: var(--tx1);
@@ -155,18 +160,6 @@ text-transform: uppercase;
     transition: .2s;
 }
 
-.tumblricon img {
-    display: block;
-    width:50px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 8px;
-    transition: .2s;
-}
-
-.tumblricon:hover img {
-    opacity: .8;
-}
 
 .icon:hover img {
     opacity: .8;
@@ -275,12 +268,9 @@ text-transform: uppercase;
 }
 
 .disclaimer {
-    font-size: 16px;
-font-family: 'VT323', monospace;
-    color: var(--tx1);
-    opacity: 0.8;
-    margin-top: px;
-    margin-bottom: 30px;
+    font-family: 'VT323', monospace;
+    font-size: 22px;
+    line-height: 1.4;
 }
 
 .preview-download-btn {
@@ -312,4 +302,20 @@ font-family: 'VT323', monospace;
 
 .preview-download-btn:active {
     transform: scale(0.95);
+}
+
+.back-button {
+    display: inline-block;
+    padding: 8px 16px;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    text-decoration: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    text-transform: uppercase;
+    transition: background 0.2s ease;
+}
+
+.back-button:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
