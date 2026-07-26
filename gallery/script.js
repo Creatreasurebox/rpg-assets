@@ -36,7 +36,8 @@ function showFolders(folders){
         const button = card.querySelector(".copy-folder");
         button.onclick = (e) => {
             e.stopPropagation(); // Empêche d'ouvrir le dossier quand on clique sur copier[cite: 1]
-            navigator.clipboard.writeText(folder.html_url); // Copie le lien GitHub du dossier
+            const customUrl = `https://creatreasurebox.github.io/rpg-assets/gallery/#${folder.path}`;
+            navigator.clipboard.writeText(customUrl);
             button.textContent = "✓";
             setTimeout(()=>{
                 button.textContent = "⧉";
@@ -202,5 +203,12 @@ function updateBreadcrumb(path){
 }
 
 
-// lance la galerie
-loadFolder(ROOT);
+// lance la galerie en vérifiant l'URL
+const hashPath = window.location.hash.substring(1);
+
+if (hashPath) {
+    currentPath = hashPath;
+    loadFolder(hashPath);
+} else {
+    loadFolder(ROOT);
+}
