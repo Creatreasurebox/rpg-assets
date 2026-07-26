@@ -299,3 +299,25 @@ if (hashPath) {
 document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
 });
+
+
+// Exemple après le fetch de l'API GitHub :
+fetch(apiUrl)
+  .then(response => response.json())
+  .then(data => {
+      
+      // === AJOUTE CE TRI ICI ===
+      data.sort((a, b) => {
+          // Optionnel : si tu veux que les dossiers soient TOUJOURS en premier, 
+          // et les fichiers ensuite, tout en étant triés par ordre alphabétique :
+          if (a.type !== b.type) {
+              return a.type === 'dir' ? -1 : 1;
+          }
+          // Tri alphabétique du nom
+          return a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' });
+      });
+      // =========================
+
+      // Le reste de ton code qui affiche la galerie (boucle sur data, etc.)
+      displayGallery(data);
+  });
