@@ -106,7 +106,7 @@ async function loadFolder(path){
 
         gallery.innerHTML = "";
 
-        if (path.endsWith('icons')) {
+        if (path.split('/').pop() === 'icons') {
             gallery.classList.add('icons-folder');
         } else {
             gallery.classList.remove('icons-folder');
