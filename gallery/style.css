@@ -277,7 +277,7 @@ h1 {
 
 .preview-download-btn {
     position: absolute;
-    bottom: 20px;
+    top: 20px; /* Modifié ici pour le placer en haut */
     right: 20px;
     width: 44px;
     height: 44px;
