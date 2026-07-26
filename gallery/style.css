@@ -1,313 +1,281 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+const USER="Creatreasurebox";
+const REPO="rpg-assets";
+const ROOT="assets";
+ 
+const gallery=document.getElementById("gallery");
+const back=document.getElementById("back");
 
-@font-face {
-    font-family: "Astone Nouvea";
-    src: url("./fonts/Astone-Nouvea.woff2") format("woff2");
-    font-weight: normal;
-    font-style: normal;
+let currentPath=ROOT;
+let history = [];
+
+let currentImages = [];
+let currentImageIndex = 0;
+const prevImage = document.getElementById("prevImage");
+const nextImage = document.getElementById("nextImage");
+const breadcrumb = document.getElementById("breadcrumb");
+
+// récupérer le contenu d'un dossier github
+async function getFolder(path){
+    const url=`https://api.github.com/repos/${USER}/${REPO}/contents/${path}`;
+    const res=await fetch(url);
+    return await res.json();
+} 
+
+function showFolders(folders){
+    folders.forEach(folder=>{
+        const card=document.createElement("div");
+        card.className="folder";
+        // Ajout du bouton copy-folder dans l'interface
+        card.innerHTML=`
+		<img class="folder-icon" src="./png/folder.png" alt="folder">
+		<div class="name">${folder.name}</div>
+        <button class="copy-folder" title="Copier l'URL du dossier">⧉</button>
+	`;
+
+        // Gestion du clic sur le bouton de copie
+        const button = card.querySelector(".copy-folder");
+        button.onclick = (e) => {
+            e.stopPropagation(); // Empêche d'ouvrir le dossier quand on clique sur copier
+            const customUrl = `https://creatreasurebox.github.io/rpg-assets/gallery/#${encodeURI(folder.path)}`;
+            navigator.clipboard.writeText(customUrl);
+            button.textContent = "✓";
+            setTimeout(()=>{
+                button.textContent = "⧉";
+            }, 1000);
+        };
+
+        // Comportement normal au clic sur le reste de la carte
+        card.onclick=()=>{
+            history.push(currentPath);
+            currentPath=folder.path;
+            loadFolder(currentPath);
+        };
+
+        gallery.appendChild(card); 
+    });
 }
 
-:root {
-    --bg1: #141419;
-    --bg2: #1d1d29;
-    --bg3: #3a3a55;
-    --bg4: #616a75;
-    --tx1: #d2d1c1;
+function showImages(images){
+    images.forEach(image=>{
+        const card=document.createElement("div");
+        card.className="icon";
+        card.innerHTML=`
+            <img src="${image.download_url}" alt="">
+            <button class="download-btn" title="Télécharger l'image">⬇</button>
+        `;
+        const button = card.querySelector(".download-btn");
+
+        const img = card.querySelector("img");
+
+        img.onclick = ()=>{
+            currentImageIndex = images.indexOf(image);
+            openPreview();
+        };
+
+        button.onclick = async (e) => {
+            e.stopPropagation();
+            
+            // Effet visuel de chargement
+            button.textContent = "⏳";
+            
+            try {
+                // Récupère l'image et force le téléchargement
+                const response = await fetch(image.download_url);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = image.name; // Utilise le nom d'origine du fichier (ex: image.png)
+                document.body.appendChild(a);
+                a.click();
+                
+                window.URL.revokeObjectURL(url);
+                
+                button.textContent = "✓";
+            } catch (error) {
+                console.error("Erreur de téléchargement:", error);
+                button.textContent = "❌";
+            }
+            
+            // Remet l'icône après 2 secondes
+            setTimeout(()=>{
+                button.textContent = "⬇";
+            }, 2000);
+        };
+        gallery.appendChild(card);
+    });
 }
 
-* {
-    box-sizing: border-box;
+// charge un dossier
+async function loadFolder(path){
+    gallery.innerHTML = "";
+
+    const files = await getFolder(path);
+
+    const folders = files.filter(
+        f => f.type === "dir"
+    );
+
+    const images = files.filter(
+        f =>
+        f.type === "file" &&
+        /\.(png|jpg|jpeg|webp|gif|svg)$/i.test(f.name)
+    );
+    currentImages = images;
+
+    showFolders(folders);
+    showImages(images);
+
+    // affiche le bouton retour si pas à la racine
+    if(path !== ROOT){
+        back.classList.remove("hidden");
+    }else{
+        back.classList.add("hidden");
+    }
+
+    // fil d'ariane
+    updateBreadcrumb(path);
 }
 
-body {
-    margin: 0;
-    padding: 40px;
-    background: var(--bg1);
-    color: var(--tx1);
-    font-family: Inter, sans-serif;
-    height: 100vh;
+// back to homepage
+back.onclick = ()=>{
+    if (history.length > 0) {
+        currentPath = history.pop();
+        loadFolder(currentPath);
+    } else {
+        currentPath = ROOT;
+        loadFolder(ROOT);
+    }
+};
+
+// ajoute le preview
+const preview = document.getElementById("preview");
+const previewImage = document.getElementById("previewImage");
+
+function openPreview(){
+    if(!preview || !previewImage) return;
+
+    previewImage.src = currentImages[currentImageIndex].download_url;
+
+    // Supprime l'ancien bouton s'il existe
+    const oldBtn = preview.querySelector('.preview-download-btn');
+    if (oldBtn) oldBtn.remove();
+
+    // Crée le nouveau bouton
+    const downloadBtn = document.createElement('button');
+    downloadBtn.className = 'preview-download-btn';
+    downloadBtn.title = 'Télécharger cette image en grand';
+    downloadBtn.textContent = '⬇';
+
+    // Comportement du clic
+    downloadBtn.onclick = async (e) => {
+        e.stopPropagation();
+        downloadBtn.textContent = "⏳";
+
+        try {
+            const response = await fetch(currentImages[currentImageIndex].download_url);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = currentImages[currentImageIndex].name;
+            document.body.appendChild(a);
+            a.click();
+
+            window.URL.revokeObjectURL(url);
+            downloadBtn.textContent = "✓";
+        } catch (error) {
+            console.error("Erreur de téléchargement:", error);
+            downloadBtn.textContent = "❌";
+        }
+
+        setTimeout(() => {
+            downloadBtn.textContent = "⬇";
+        }, 2000);
+    };
+
+    preview.querySelector('.preview-content').appendChild(downloadBtn);
+
+    preview.classList.remove("hidden", "hide");
+
+    requestAnimationFrame(() => {
+        preview.classList.add("show");
+    });
 }
 
-h1 {
-    font-family: "Astone Nouvea";
-    font-size: 42px;
+function hidePreview(){
+    if(!preview || !previewImage) return;
+
+    preview.classList.remove("show");
+    preview.classList.add("hide");
+
+    // pour l'animation
+    setTimeout(() => {
+        preview.classList.add("hidden");
+        preview.classList.remove("hide");
+        previewImage.src = "";
+    }, 250);
 }
 
-.toolbar {
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
-    align-items: center;
-    margin-bottom: 30px;
+// ferme quand je clique en-dehors de l'image
+if(preview){
+    preview.onclick = (e) => {
+        if(e.target === preview){
+            hidePreview();
+        }
+    };
 }
 
-#breadcrumb {
-    font-size: 12px;
-    font-style: italic;
-    letter-spacing: 1px;
+// comportement du clic sur les flèches de preview
+prevImage.onclick = (e) => {
+    e.stopPropagation();
+    showImage(currentImageIndex - 1);
+};
+
+nextImage.onclick = (e) => {
+    e.stopPropagation();
+    showImage(currentImageIndex + 1);
+};
+
+function showImage(index){
+    if(index < 0){
+        index = currentImages.length - 1;
+    }else if(index >= currentImages.length){
+        index = 0;
+    }
+
+    currentImageIndex = index;
+    previewImage.src = currentImages[currentImageIndex].download_url;
 }
 
-#back {
-    padding: 10px 16px;
-    background: var(--tx1);
-    border:1px solid #0a0605;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: .2s;
-    color: var(--bg2);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 600;
-    font-size: 12px;
+// ajout fil d'ariane
+function updateBreadcrumb(path){
+    if(!breadcrumb) return;
+
+    const parts = path.split("/");
+
+    if(parts[0] === ROOT){
+        parts.shift();
+    }
+
+    breadcrumb.textContent = parts.length ? parts.join(" / ") : "accueil";
 }
 
-#back:hover {
-    background: var(--bg3);
-    color: var(--tx1);
+// lance la galerie en vérifiant l'URL
+const hashPath = decodeURI(window.location.hash.substring(1));
+
+if (hashPath) {
+    currentPath = hashPath;
+    loadFolder(hashPath);
+} else {
+    loadFolder(ROOT);
 }
 
-.hidden {
-    display: none;
-}
-
-#gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 160px);
-    gap: 20px;
-    padding-bottom: 42px;
-}
-
-.folder {
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    width:160px;
-    height:160px;
-    padding:12px;
-    background:var(--bg2); /*[cite: 2] */
-    border:1px solid var(--bg3); /*[cite: 2] */
-    border-radius:12px; /*[cite: 2] */
-    cursor:pointer;
-    transition:.2s;
-    position: relative; /* Ligne ajoutée pour permettre le positionnement absolu du bouton */
-}
-
-/* Styles inspirés de ta classe .copy existante[cite: 2] */
-.copy-folder {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0; /* Caché par défaut */
-    background: rgba(13,17,23,.85);
-    color: var(--tx1);
-    border: 1px solid var(--bg3);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: .2s;
-}
-
-/* Fait apparaître le bouton au survol du dossier, comme pour les icônes[cite: 2] */
-.folder:hover .copy-folder {
-    opacity: 1;
-}
-
-.folder:hover {
-    border-color: var(--bg4);
-}
-
-.folder .name {
-    margin-top:10px;
-    text-align:center;
-    font-size:14px;
-    color: var(--tx1);
-}
-
-.folder-icon {
-    width: 36px;
-}
-
-.icon {
-    position: relative;
-    width: 160px;
-    height: 256px;
-    cursor: pointer;
-}
-
-.icon img {
-    display: block;
-    width: 160px;
-    height: 256px;
-    object-fit: cover;
-    border-radius: 8px;
-    transition: .2s;
-}
-
-.tumblricon img {
-    display: block;
-    width:50px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 8px;
-    transition: .2s;
-}
-
-.tumblricon:hover img {
-    opacity: .8;
-}
-
-.icon:hover img {
-    opacity: .8;
-}
-
-.download-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    background: rgba(13,17,23,.85);
-    color: var(--tx1);
-    border: 1px solid var(--bg3);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: .2s;
-}
-
-.icon:hover .download-btn {
-    opacity: 1;
-}
-
-.preview {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.75);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
-    opacity: 0;
-    transition: opacity .25s ease;
-}
-
-.preview.hidden {
-    display: none;
-}
-
-.preview-content {
-    position: relative;
-    transform: translateY(40px);
-    opacity: 0;
-    transition: transform .25s ease, opacity .25s ease;
-}
-
-.preview-content img {
-    max-height: 640px;
-    object-fit: contain;
-    background: white;
-    border-radius: 10px;
-}
-
-.preview.show {
-    opacity: 1;
-}
-
-.preview.show .preview-content {
-    transform: translateY(0);
-    opacity: 1;
-}
-
-.preview.hide {
-    opacity: 0;
-}
-
-.preview.hide .preview-content {
-    transform: translateY(40px);
-    opacity: 0;
-}
-
-.nav{
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 50px;
-    height: 50px;
-    border: none;
-    border-radius: 50%;
-    background: #00000030;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    z-index: 10;
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--color1);
-    transition: .2s;
-    padding-bottom: 5px;
-}
-
-.prev{
-    left: -70px;
-}
-
-.next{
-    margin-left: 20px;
-}
-
-.nav:hover{
-    background: var(--color1);
-}
-
-.disclaimer {
-    font-size: 14px;
-    font-style: italic;
-    color: var(--tx1);
-    opacity: 0.8; /* Rend le texte légèrement transparent pour ne pas prendre le dessus sur le titre */
-    margin-top: -15px; /* Rapproche un peu le texte du titre h1 */
-    margin-bottom: 30px;
-}
-
-.preview-content {
-    position: relative;
-}
-
-.preview-download-btn {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(20, 20, 25, 0.85);
-    color: var(--tx1);
-    border: 2px solid var(--bg3);
-    border-radius: 50%;
-    font-size: 20px;
-    cursor: pointer;
-    transition: 0.2s, transform 0.1s;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-    z-index: 20;
-}
-
-.preview-download-btn:hover {
-    background: var(--bg3);
-    border-color: var(--bg4);
-    transform: scale(1.05);
-}
-
-.preview-download-btn:active {
-    transform: scale(0.95);
-}
+// Désactiver le clic droit sur toute la page
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+});
