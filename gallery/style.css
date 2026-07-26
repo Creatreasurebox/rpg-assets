@@ -276,3 +276,38 @@ h1 {
     margin-top: -15px; /* Rapproche un peu le texte du titre h1 */
     margin-bottom: 30px;
 }
+
+.preview-content {
+    position: relative;
+}
+
+.preview-download-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(20, 20, 25, 0.85);
+    color: var(--tx1);
+    border: 2px solid var(--bg3);
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    transition: 0.2s, transform 0.1s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    z-index: 20;
+}
+
+.preview-download-btn:hover {
+    background: var(--bg3);
+    border-color: var(--bg4);
+    transform: scale(1.05);
+}
+
+.preview-download-btn:active {
+    transform: scale(0.95);
+}
