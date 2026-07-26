@@ -315,3 +315,9 @@ opacity: 1;
 .back-button:hover {
     background: rgba(255, 255, 255, 0.1);
 }
+
+.gallery.icons-folder .icon img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+}
