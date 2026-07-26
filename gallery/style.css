@@ -1,18 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
-@import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400..700&display=swap');
 
 @font-face {
     font-family: "Astone Nouvea";
     src: url("./fonts/Astone-Nouvea.woff2") format("woff2");
     font-weight: normal;
     font-style: normal;
-}
-
-.medievalsharp-regular {
-  font-family: "MedievalSharp", cursive;
-  font-weight: 400;
-  font-style: normal;
 }
 
 
@@ -38,8 +32,8 @@ body {
 }
 
 h1 {
-font-family: 'MedievalSharp', cursive;
-    font-size: 48px; 
+font-family: 'Space Grotesk', sans-serif;
+    font-size: 42px; 
 }
 
 .toolbar {
