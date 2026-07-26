@@ -106,6 +106,12 @@ async function loadFolder(path){
 
         gallery.innerHTML = "";
 
+        if (path.endsWith('icons')) {
+            gallery.classList.add('icons-folder');
+        } else {
+            gallery.classList.remove('icons-folder');
+        }
+
         files.sort((a, b) => {
             if (a.type !== b.type) {
                 return a.type === 'dir' ? -1 : 1;
