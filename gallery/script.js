@@ -161,10 +161,102 @@ function openPreview(){
 
     previewImage.src = currentImages[currentImageIndex].download_url;
 
+    // Supprime l'ancien bouton s'il existe
+    const oldBtn = preview.querySelector('.preview-download-btn');
+    if (oldBtn) oldBtn.remove();
+
+    // Crée le nouveau bouton
+    const downloadBtn = document.createElement('button');
+    downloadBtn.className = 'preview-download-btn';
+    downloadBtn.title = 'Télécharger cette image en grand';
+    downloadBtn.textContent = '⬇';
+
+    // Comportement du clic
+    downloadBtn.onclick = async (e) => {
+        e.stopPropagation();
+        downloadBtn.textContent = "⏳";
+
+        try {
+            const response = await fetch(currentImages[currentImageIndex].download_url);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = currentImages[currentImageIndex].name;
+            document.body.appendChild(a);
+            a.click();
+
+            window.URL.revokeObjectURL(url);
+            downloadBtn.textContent = "✓";
+        } catch (error) {
+            console.error("Erreur de téléchargement:", error);
+            downloadBtn.textContent = "❌";
+        }
+
+        setTimeout(() => {
+            downloadBtn.textContent = "⬇";
+        }, 2000);
+    };
+
+    preview.querySelector('.preview-content').appendChild(downloadBtn);
+
     preview.classList.remove("hidden", "hide");
 
     requestAnimationFrame(() => {
         preview.classList.add("show");
+    });
+}
+    images.forEach(image=>{
+        const card=document.createElement("div");
+        card.className="icon";
+        card.innerHTML=`
+            <img src="${image.download_url}" alt="">
+            <button class="download-btn" title="Télécharger l'image">⬇</button>
+        `;
+        const button = card.querySelector(".download-btn");
+
+        const img = card.querySelector("img");
+
+        img.onclick = ()=>{
+            currentImageIndex = images.indexOf(image);
+            openPreview();
+        };
+
+        button.onclick = async (e) => {
+            e.stopPropagation();
+            
+            // Effet visuel de chargement
+            button.textContent = "⏳";
+            
+            try {
+                // Récupère l'image et force le téléchargement
+                const response = await fetch(image.download_url);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = image.name; // Utilise le nom d'origine du fichier (ex: image.png)
+                document.body.appendChild(a);
+                a.click();
+                
+                window.URL.revokeObjectURL(url);
+                
+                button.textContent = "✓";
+            } catch (error) {
+                console.error("Erreur de téléchargement:", error);
+                button.textContent = "❌";
+            }
+            
+            // Remet l'icône après 2 secondes
+            setTimeout(()=>{
+                button.textContent = "⬇";
+            }, 2000);
+        };
+        gallery.appendChild(card);
     });
 }
 
