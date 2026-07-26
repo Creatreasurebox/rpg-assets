@@ -62,9 +62,9 @@ function showImages(images){
         card.className="icon";
         card.innerHTML=`
             <img src="${image.download_url}" alt="">
-            <button class="copy" title="Copier l'URL">⧉</button>
+            <button class="download-btn" title="Télécharger l'image">⬇</button>
         `;
-        const button=card.querySelector(".copy");
+        const button = card.querySelector(".download-btn");
 
         const img = card.querySelector("img");
 
@@ -73,13 +73,37 @@ function showImages(images){
             openPreview();
         };
 
-        button.onclick=(e)=>{
+        button.onclick = async (e) => {
             e.stopPropagation();
-            navigator.clipboard.writeText(image.download_url);
-            button.textContent="✓";
+            
+            // Effet visuel de chargement
+            button.textContent = "⏳";
+            
+            try {
+                // Récupère l'image et force le téléchargement
+                const response = await fetch(image.download_url);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = image.name; // Utilise le nom d'origine du fichier (ex: image.png)
+                document.body.appendChild(a);
+                a.click();
+                
+                window.URL.revokeObjectURL(url);
+                
+                button.textContent = "✓";
+            } catch (error) {
+                console.error("Erreur de téléchargement:", error);
+                button.textContent = "❌";
+            }
+            
+            // Remet l'icône après 2 secondes
             setTimeout(()=>{
-                button.textContent="⧉";
-            },1000);
+                button.textContent = "⬇";
+            }, 2000);
         };
         gallery.appendChild(card);
     });

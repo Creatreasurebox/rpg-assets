@@ -166,7 +166,7 @@ h1 {
     opacity: .8;
 }
 
-.copy {
+.download-btn {
     position: absolute;
     top: 8px;
     right: 8px;
@@ -185,7 +185,7 @@ h1 {
     transition: .2s;
 }
 
-.icon:hover .copy {
+.icon:hover .download-btn {
     opacity: 1;
 }
 
