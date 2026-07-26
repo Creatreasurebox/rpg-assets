@@ -236,3 +236,8 @@ if (hashPath) {
 } else {
     loadFolder(ROOT);
 }
+
+// Désactiver le clic droit sur toute la page
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+});
