@@ -4,16 +4,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>titre de votre onglet</title>
+    <title>My Gallery</title>
     <link rel="icon" type="image/png" href="png/folder.png"/>
-    <link rel="tumblricon" type="image/png" href="png/TumblrIcon.png"/>
     <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
 <div class="container">
     <h1>My Gallery</h1> 
-    <p class="disclaimer"> <a href="https://creatreasurebox.tumblr.com/"><img id="tumblricon" src="" alt=""></a> </p>
+    
+    <!-- Disclaimer et lien Tumblr -->
+    <div class="disclaimer" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+        <span>Merci de réhéberger ces images en les téléchargeants. / Please re-host these images by downloading them. </span>
+        <a href="https://creatreasurebox.tumblr.com/" target="_blank" title="Mon Tumblr">
+            <img class="tumblricon" src="png/TumblrIcon.png" alt="Tumblr" style="width: 40px; height: 40px; object-fit: cover; border-radius: 8px; transition: 0.2s;">
+        </a>
+    </div>
+
     <!-- caché au départ -->
     <div class="toolbar">
         <button id="back" class="hidden">
